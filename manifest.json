@@ -3,7 +3,7 @@
   "short_name": "만찾",
   "description": "서만창 도서 검색 및 서가 위치 안내 시스템",
   "start_url": "/",
-  "display": "standalone",https://github.com/OriOcci/Manchat/tree/main
+  "display": "standalone",
   "background_color": "#0f1115",
   "theme_color": "#0f1115",
   "icons": [
