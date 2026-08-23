@@ -417,9 +417,10 @@ function filterAndRender(isPartialMode = false) {
   }
 
   filteredData.sort((a, b) => {
-    if (sort === 'loc') return a[3].localeCompare(b[3], 'ko');
-    if (sort === 'title') return a[0].localeCompare(b[0], 'ko');
-    if (sort === 'author') return a[1].localeCompare(b[1], 'ko');
+    const opts = { numeric: true, sensitivity: 'base' };
+    if (sort === 'loc') return a[3].localeCompare(b[3], 'ko', opts);
+    if (sort === 'title') return a[0].localeCompare(b[0], 'ko', opts);
+    if (sort === 'author') return a[1].localeCompare(b[1], 'ko', opts);
     return 0;
   });
 
