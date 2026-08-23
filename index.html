@@ -729,12 +729,24 @@ document.getElementById('sort').addEventListener('change', () => filterAndRender
 
 /* I'm Feeling Lucky (랜덤 도서 오픈) 기능 */
 document.getElementById('luckyBtn').onclick = () => {
-  if (filteredData.length === 0) {
-    showToast('검색 결과가 없어 랜덤 선택을 할 수 없습니다.');
+  if (currentData.length === 0) {
+    showToast('도서 데이터가 없어 선택할 수 없습니다.');
     return;
   }
-  const randomIndex = Math.floor(Math.random() * filteredData.length);
-  openModal(randomIndex);
+  // 전체 데이터(currentData) 기준 랜덤 선택
+  const randomBook = currentData[Math.floor(Math.random() * currentData.length)];
+  
+  // 현재 filteredData 상에서 해당 항목의 위치(index) 탐색
+  let targetIndex = filteredData.indexOf(randomBook);
+  
+  // 만약 검색어로 인해 현재 필터링된 결과에 없다면, 전체 목록으로 재설정 후 열기
+  if (targetIndex === -1) {
+    document.getElementById('q').value = '';
+    filterAndRender(false);
+    targetIndex = filteredData.indexOf(randomBook);
+  }
+  
+  openModal(targetIndex);
 };
 
 document.getElementById('more').onclick = () => {
