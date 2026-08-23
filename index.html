@@ -4,22 +4,37 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>만찾, 서만창 도서 검색 시스템</title>
+
+<!-- Gothic A1 웹폰트 로드 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;600;700;800&display=swap" rel="stylesheet">
+
 <style>
 :root{--bg:#0f1115;--card:#171a21;--line:#262b36;--txt:#e8eaed;--sub:#98a1b3;--acc:#5b8cff;--acc2:#22c55e;--warn:#f59e0b}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:'Gothic A1',-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif}
 header{position:sticky;top:0;background:rgba(15,17,21,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:16px 16px 12px;z-index:10}
 .wrap{max-width:980px;margin:0 auto}
 .titlerow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 h1{margin:0;font-size:19px;letter-spacing:-.3px}
 h1 span{color:var(--sub);font-size:13px;font-weight:400;margin-left:8px}
-.btn{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:13px;cursor:pointer}
+.btn{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:13px;cursor:pointer;font-family:inherit}
 .btn:hover{border-color:var(--acc)}
 .btn.ghost{color:var(--sub)}
-.searchbar{display:flex;gap:8px;flex-wrap:wrap}
-input[type=search]{flex:1;min-width:220px;padding:12px 14px;font-size:15px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--txt);outline:none}
+.btn.lucky{background:rgba(91,140,255,.1);border-color:var(--acc);color:var(--acc);font-weight:600;white-space:nowrap}
+.btn.lucky:hover{background:var(--acc);color:#fff}
+
+/* 검색바 레이아웃 구조 */
+.searchbar{display:flex;flex-direction:column;gap:8px}
+.search-top-row{display:flex;gap:8px;width:100%}
+input[type=search]{flex:1;min-width:0;padding:12px 14px;font-size:15px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--txt);outline:none;font-family:inherit}
 input[type=search]:focus{border-color:var(--acc)}
-select{padding:12px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:14px}
+
+/* 정렬 영역 레이아웃 (라벨 + 드롭다운) */
+.sort-container{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub);font-weight:600}
+select{flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:14px;font-family:inherit}
+
 main{max-width:980px;margin:0 auto;padding:16px}
 .src{font-size:12px;color:var(--sub);margin-bottom:10px}
 .src b{color:var(--acc2)}
@@ -32,16 +47,16 @@ tr.clickable-row:hover td{background:#151923}
 .loc{display:inline-block;padding:3px 9px;border-radius:6px;background:#1d2a1f;color:var(--acc2);font-weight:700;font-size:12px;letter-spacing:.5px}
 mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
 .empty{text-align:center;color:var(--sub);padding:48px 0;line-height:1.6}
-.partial-btn{margin-top:12px;padding:8px 16px;border-radius:8px;border:1px solid var(--acc);background:rgba(91,140,255,.1);color:var(--acc);font-size:13px;cursor:pointer;font-weight:600}
+.partial-btn{margin-top:12px;padding:8px 16px;border-radius:8px;border:1px solid var(--acc);background:rgba(91,140,255,.1);color:var(--acc);font-size:13px;cursor:pointer;font-weight:600;font-family:inherit}
 .partial-btn:hover{background:var(--acc);color:#fff}
-.more{display:block;width:100%;margin:16px 0 40px;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--txt);cursor:pointer;font-size:14px}
+.more{display:block;width:100%;margin:16px 0 40px;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--txt);cursor:pointer;font-size:14px;font-family:inherit}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1e2432;border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:100}
 .toast.on{opacity:1}
 
 /* 개발자 전용 검색 안내 배너 */
 .dev-banner{background:rgba(91,140,255,.08);border:1px solid var(--acc);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .dev-banner-text{font-size:14px;color:var(--txt);font-weight:600}
-.dev-banner-btn{padding:8px 14px;border-radius:8px;border:none;background:var(--acc);color:#fff;font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0}
+.dev-banner-btn{padding:8px 14px;border-radius:8px;border:none;background:var(--acc);color:#fff;font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0;font-family:inherit}
 .dev-banner-btn:hover{opacity:.9}
 
 /* 모달 공통 스타일 */
@@ -49,18 +64,18 @@ mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
 .modal-overlay.active{opacity:1;pointer-events:auto}
 .modal{background:var(--card);border:1px solid var(--line);border-radius:16px;width:92%;max-width:540px;padding:24px;position:relative;box-shadow:0 20px 40px rgba(0,0,0,.5);transform:translateY(10px);transition:transform .2s ease;max-height:90vh;overflow-y:auto}
 .modal-overlay.active .modal{transform:translateY(0)}
-.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--sub);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--sub);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;font-family:inherit}
 .modal-close:hover{color:var(--txt);background:var(--line)}
 
 /* 개발자 모달 전용 스타일 */
 .dev-modal{max-width:440px}
 .dev-header{font-size:18px;font-weight:700;color:var(--txt);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
 .dev-body{display:flex;flex-direction:column;gap:10px}
-.dev-menu-btn{width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--line);background:#101216;color:var(--txt);font-size:14px;text-align:left;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:border-color .15s}
+.dev-menu-btn{width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--line);background:#101216;color:var(--txt);font-size:14px;text-align:left;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:border-color .15s;font-family:inherit}
 .dev-menu-btn:hover{border-color:var(--acc)}
 .dev-info-box{background:#101216;border:1px solid var(--line);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--sub);display:none;margin-top:-2px}
 .dev-sub-box{background:#101216;border:1px solid var(--line);border-radius:10px;padding:10px;display:none;margin-top:-2px;gap:8px;flex-direction:column}
-.dev-sub-btn{width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:13px;text-align:left;cursor:pointer;transition:border-color .15s}
+.dev-sub-btn{width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:13px;text-align:left;cursor:pointer;transition:border-color .15s;font-family:inherit}
 .dev-sub-btn:hover{border-color:var(--acc);color:var(--acc)}
 .dev-footer{margin-top:20px;display:flex;justify-content:flex-end}
 
@@ -69,7 +84,7 @@ mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
 .notice-header{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:700;color:var(--txt);margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line)}
 .notice-body{font-size:14px;color:#c0c6d4;line-height:1.6;white-space:pre-line;max-height:300px;overflow-y:auto;padding-right:4px}
 .notice-footer{margin-top:20px;display:flex;justify-content:flex-end}
-.notice-btn{padding:8px 16px;border-radius:8px;border:none;background:var(--acc);color:#fff;font-weight:600;font-size:13px;cursor:pointer}
+.notice-btn{padding:8px 16px;border-radius:8px;border:none;background:var(--acc);color:#fff;font-weight:600;font-size:13px;cursor:pointer;font-family:inherit}
 .notice-btn:hover{opacity:.9}
 
 /* 도서 상세 모달 스타일 */
@@ -113,14 +128,18 @@ mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
   </div>
 </div>
 <div class="searchbar">
-  <input id="q" type="search" placeholder="도서명 · 저자 · 출판사 · 위치 검색" autocomplete="off">
-  <select id="field">
-    <option value="all">전체</option><option value="0">도서명</option>
-    <option value="1">저자</option><option value="2">출판사</option><option value="3">위치</option>
-  </select>
-  <select id="sort">
-    <option value="title" selected>도서명순</option><option value="loc">위치순</option><option value="author">저자순</option>
-  </select>
+  <div class="search-top-row">
+    <input id="q" type="search" placeholder="도서명 · 저자 · 출판사 · 위치 검색" autocomplete="off">
+    <button class="btn lucky" id="luckyBtn">🎲 I'm Feeling Lucky</button>
+  </div>
+  <div class="sort-container">
+    <span>정렬 순서:</span>
+    <select id="sort">
+      <option value="title" selected>도서명</option>
+      <option value="loc">위치</option>
+      <option value="author">저자</option>
+    </select>
+  </div>
 </div>
 </div></header>
 <main>
@@ -226,6 +245,9 @@ let filteredData = [];
 let displayCount = 50;
 let currentHighlightTerms = [];
 
+// API 호출 결과 캐시 (메모리 최적화)
+const bookApiCache = new Map();
+
 async function checkNotice() {
   try {
     const res = await fetch('notice.txt');
@@ -319,7 +341,6 @@ function getSubstrings(str) {
 
 function filterAndRender(isPartialMode = false) {
   const q = document.getElementById('q').value.trim().toLowerCase();
-  const field = document.getElementById('field').value;
   const sort = document.getElementById('sort').value;
   const devBanner = document.getElementById('devBanner');
 
@@ -336,29 +357,17 @@ function filterAndRender(isPartialMode = false) {
   } else if (!isPartialMode) {
     currentHighlightTerms = [q];
     filteredData = currentData.filter(row => {
-      if (field === 'all') {
-        return row.some(cell => cell.toLowerCase().includes(q));
-      } else {
-        const idx = parseInt(field, 10);
-        return row[idx] && row[idx].toLowerCase().includes(q);
-      }
+      return row.some(cell => cell.toLowerCase().includes(q));
     });
   } else {
     const subTerms = getSubstrings(q);
     currentHighlightTerms = subTerms.length > 0 ? subTerms : [q];
 
     filteredData = currentData.filter(row => {
-      const checkCell = (cell) => {
+      return row.some(cell => {
         const lowerCell = cell.toLowerCase();
         return subTerms.some(term => lowerCell.includes(term));
-      };
-
-      if (field === 'all') {
-        return row.some(cell => checkCell(cell));
-      } else {
-        const idx = parseInt(field, 10);
-        return row[idx] && checkCell(row[idx]);
-      }
+      });
     });
   }
 
@@ -449,14 +458,14 @@ devOverlay.onclick = (e) => {
   if (e.target.id === 'devOverlay') closeDevModal();
 };
 
-/* 2. 버전 정보 토글 */
+/* 버전 정보 토글 */
 document.getElementById('devVersionToggleBtn').onclick = () => {
   const isHidden = devVersionBox.style.display === 'none' || !devVersionBox.style.display;
   devVersionBox.style.display = isHidden ? 'block' : 'none';
   devVersionArrow.innerText = isHidden ? '▲' : '▼';
 };
 
-/* 3. 기타 토글 및 이스터에그 */
+/* 기타 토글 및 이스터에그 */
 document.getElementById('devEtcToggleBtn').onclick = () => {
   const isHidden = devEtcBox.style.display === 'none' || !devEtcBox.style.display;
   devEtcBox.style.display = isHidden ? 'flex' : 'none';
@@ -467,7 +476,7 @@ document.getElementById('easterEgg1Btn').onclick = () => {
   window.open("https://www.nyan.cat/", "_blank");
 };
 
-/* 1. 파일 업로드 */
+/* 파일 업로드 */
 const devFileInput = document.getElementById('devFileInput');
 document.getElementById('devUploadBtn').onclick = () => devFileInput.click();
 
@@ -561,8 +570,12 @@ function renderShelfGrid(activeLocStr) {
   }
 }
 
-/* Vercel Serverless Function 호출 로직 적용 */
 async function fetchKakaoBookData(query) {
+  const cacheKey = query.trim().toLowerCase();
+  if (bookApiCache.has(cacheKey)) {
+    return bookApiCache.get(cacheKey);
+  }
+
   try {
     const url = `/api/book?query=${encodeURIComponent(query)}`;
     const res = await fetch(url);
@@ -572,10 +585,12 @@ async function fetchKakaoBookData(query) {
 
     if (data.documents && data.documents.length > 0) {
       const doc = data.documents[0];
-      return {
+      const result = {
         thumbnail: doc.thumbnail || null,
         contents: doc.contents || null
       };
+      bookApiCache.set(cacheKey, result);
+      return result;
     }
   } catch (e) {
     console.error("API 로드 에러:", e);
@@ -611,6 +626,7 @@ async function openModal(index) {
 
   document.getElementById('modalOverlay').classList.add('active');
 
+  // 권수 (1), (2) -> 1권, 2권 변환 로직 유지
   let formattedTitle = title
     .replace(/[\(\[\{]\s*0*(\d+)\s*[\)\]\}]/g, ' $1권 ')
     .replace(/\([^\d]*?\)/g, '')
@@ -626,8 +642,16 @@ async function openModal(index) {
     .replace(/\s+\d+$/g, '')
     .trim();
 
-  let bookData = await fetchKakaoBookData(formattedTitle);
+  // 1차: 변환된 제목 + 저자명으로 검색 (정확도 향상)
+  let searchQuery = author && author !== '-' ? `${formattedTitle} ${author}` : formattedTitle;
+  let bookData = await fetchKakaoBookData(searchQuery);
 
+  // 2차: 검색 실패 시 변환된 제목만으로 검색
+  if ((!bookData || !bookData.thumbnail) && searchQuery !== formattedTitle) {
+    bookData = await fetchKakaoBookData(formattedTitle);
+  }
+
+  // 3차: 여전히 실패 시 기본 제목으로 fallback 검색
   if ((!bookData || !bookData.thumbnail) && baseTitle !== formattedTitle) {
     const fallbackData = await fetchKakaoBookData(baseTitle);
     if (fallbackData) {
@@ -673,8 +697,17 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.getElementById('q').addEventListener('input', () => filterAndRender(false));
-document.getElementById('field').addEventListener('change', () => filterAndRender(false));
 document.getElementById('sort').addEventListener('change', () => filterAndRender(false));
+
+/* I'm Feeling Lucky (랜덤 도서 오픈) 기능 */
+document.getElementById('luckyBtn').onclick = () => {
+  if (filteredData.length === 0) {
+    showToast('검색 결과가 없어 랜덤 선택을 할 수 없습니다.');
+    return;
+  }
+  const randomIndex = Math.floor(Math.random() * filteredData.length);
+  openModal(randomIndex);
+};
 
 document.getElementById('more').onclick = () => {
   displayCount += 50;
