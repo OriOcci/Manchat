@@ -220,12 +220,7 @@ mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
   </div>
 </div>
 
-<script src="config.js"></script>
 <script>
-if (typeof KAKAO_REST_API_KEY === 'undefined') {
-  var KAKAO_REST_API_KEY = "YOUR_KAKAO_REST_API_KEY";
-}
-
 let currentData = [];
 let filteredData = [];
 let displayCount = 50;
@@ -566,19 +561,11 @@ function renderShelfGrid(activeLocStr) {
   }
 }
 
+/* Vercel Serverless Function 호출 로직 적용 */
 async function fetchKakaoBookData(query) {
-  if (!KAKAO_REST_API_KEY || KAKAO_REST_API_KEY === "YOUR_KAKAO_REST_API_KEY") {
-    return null;
-  }
-
   try {
-    const url = `https://dapi.kakao.com/v3/search/book?target=title&size=1&query=${encodeURIComponent(query)}`;
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Authorization': `KakaoAK ${KAKAO_REST_API_KEY}`
-      }
-    });
+    const url = `/api/book?query=${encodeURIComponent(query)}`;
+    const res = await fetch(url);
 
     if (!res.ok) return null;
     const data = await res.json();
@@ -591,7 +578,7 @@ async function fetchKakaoBookData(query) {
       };
     }
   } catch (e) {
-    console.error("Kakao API 로드 에러:", e);
+    console.error("API 로드 에러:", e);
   }
   return null;
 }
