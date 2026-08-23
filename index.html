@@ -103,19 +103,47 @@ mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
 .summary-title{font-size:12px;font-weight:600;color:var(--sub);margin-bottom:6px}
 .summary-content{font-size:13px;color:#c0c6d4;line-height:1.5;max-height:90px;overflow-y:auto;white-space:pre-line;background:#101216;padding:8px 12px;border-radius:6px;border:1px solid var(--line)}
 
-/* 책장 시각화 영역 */
+/* 책장 시각화 영역 (반응형 최적화) */
 .shelf-section{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
 .shelf-title{font-size:12px;font-weight:600;color:var(--sub);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
 .shelf-title span{color:var(--acc2);font-weight:700}
 
-.shelf-grid{display:grid;grid-template-columns:repeat(6, 1fr);gap:3px;background:#101216;padding:6px;border-radius:8px;border:1px solid var(--line)}
-.shelf-cell{aspect-ratio:4.4/1;background:#1a1e28;border:1px solid #282e3d;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#576071;font-weight:600;transition:all .2s ease}
+.shelf-grid{
+  display:grid;
+  grid-template-columns:repeat(6, 1fr);
+  gap:3px;
+  background:#101216;
+  padding:6px;
+  border-radius:8px;
+  border:1px solid var(--line);
+  width:100%;
+  overflow-x:auto; /* 예외적인 극소형 화면 대응 */
+}
+.shelf-cell{
+  aspect-ratio:3.5/1; /* 모바일 대응 비율 조정 */
+  background:#1a1e28;
+  border:1px solid #282e3d;
+  border-radius:3px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:9px;
+  color:#576071;
+  font-weight:600;
+  transition:all .2s ease;
+  min-width:0; /* 그리드 항목 overflow 방지 */
+}
 .shelf-cell.active{background:var(--acc2);color:#000;border-color:var(--acc2);font-weight:800;box-shadow:0 0 6px rgba(34,197,94,.5);transform:scale(1.05);z-index:1}
 
 @media(max-width:560px){
   .hide-sm{display:none}
+  .modal{padding:16px}
   .modal-body{flex-direction:column;align-items:center}
   .modal-info{width:100%}
+  
+  /* 모바일 반응형 책장 그리드 최적화 */
+  .shelf-grid{padding:4px;gap:2px}
+  .shelf-cell{font-size:8px;aspect-ratio:3/1}
 }
 </style>
 </head>
