@@ -164,7 +164,6 @@ mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
 
 <script src="config.js"></script>
 <script>
-// config.js 미사용 시 사용할 fallback
 if (typeof KAKAO_REST_API_KEY === 'undefined') {
   var KAKAO_REST_API_KEY = "YOUR_KAKAO_REST_API_KEY";
 }
@@ -173,7 +172,6 @@ let currentData = [];
 let filteredData = [];
 let displayCount = 50;
 
-/* notice.txt 로드 및 공지사항 팝업 처리 */
 async function checkNotice() {
   try {
     const res = await fetch('notice.txt');
@@ -185,7 +183,7 @@ async function checkNotice() {
       document.getElementById('noticeOverlay').classList.add('active');
     }
   } catch (err) {
-    // notice.txt 파일이 없거나 읽기 실패 시 무시
+    // notice.txt 예외 처리
   }
 }
 
@@ -239,11 +237,7 @@ async function loadDefaultCSV() {
     const text = await res.text();
     currentData = parseCSV(text);
     
-    if (currentData.length > 0) {
-      document.getElementById('src').innerHTML = `데이터 출처: <b>기본 database.csv</b> (${currentData.length}건)`;
-    } else {
-      document.getElementById('src').innerText = '';
-    }
+    document.getElementById('src').innerText = '';
     document.getElementById('resetBtn').hidden = true;
     filterAndRender();
   } catch (err) {
@@ -546,7 +540,6 @@ document.getElementById('resetBtn').onclick = () => {
   showToast('기본 CSV 데이터로 돌아왔습니다.');
 };
 
-// 초기 실행
 checkNotice();
 loadDefaultCSV();
 </script>
