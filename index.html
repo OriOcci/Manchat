@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>서재 도서 검색</title>
+<title>만찾, 서만창 도서 검색 시스템</title>
 <style>
 :root{--bg:#0f1115;--card:#171a21;--line:#262b36;--txt:#e8eaed;--sub:#98a1b3;--acc:#5b8cff;--acc2:#22c55e;--warn:#f59e0b}
 *{box-sizing:border-box}
@@ -44,9 +44,9 @@ mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
 <body>
 <header><div class="wrap">
 <div class="titlerow">
-  <h1>📚 서재 도서 검색<span id="total"></span></h1>
+  <h1>📚 만찾<span>서만창 도서 검색 시스템</span></h1>
   <div class="tools">
-    <button class="btn" id="upBtn">📤 CSV 업로드</button>
+    <button class="btn" id="upBtn">데이터베이스 수동 업로드 (.csv)</button>
     <button class="btn ghost" id="resetBtn" hidden>↩ 기본 데이터로</button>
     <input type="file" id="file" accept=".csv,text/csv" hidden>
   </div>
@@ -195,13 +195,11 @@ function filterAndRender() {
 // 테이블 렌더링
 function renderTable() {
   const rowsEl = document.getElementById('rows');
-  const totalEl = document.getElementById('total');
   const statEl = document.getElementById('stat');
   const emptyEl = document.getElementById('empty');
   const moreBtn = document.getElementById('more');
   const q = document.getElementById('q').value.trim();
 
-  totalEl.innerText = ` (${currentData.length}권)`;
   statEl.innerText = `검색 결과: ${filteredData.length}건`;
 
   if (filteredData.length === 0) {
