@@ -13,7 +13,6 @@ header{position:sticky;top:0;background:rgba(15,17,21,.96);backdrop-filter:blur(
 .titlerow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 h1{margin:0;font-size:19px;letter-spacing:-.3px}
 h1 span{color:var(--sub);font-size:13px;font-weight:400;margin-left:8px}
-.tools{display:flex;gap:6px}
 .btn{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:13px;cursor:pointer}
 .btn:hover{border-color:var(--acc)}
 .btn.ghost{color:var(--sub)}
@@ -32,10 +31,18 @@ tr.clickable-row{cursor:pointer;transition:background .15s}
 tr.clickable-row:hover td{background:#151923}
 .loc{display:inline-block;padding:3px 9px;border-radius:6px;background:#1d2a1f;color:var(--acc2);font-weight:700;font-size:12px;letter-spacing:.5px}
 mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
-.empty{text-align:center;color:var(--sub);padding:48px 0}
+.empty{text-align:center;color:var(--sub);padding:48px 0;line-height:1.6}
+.partial-btn{margin-top:12px;padding:8px 16px;border-radius:8px;border:1px solid var(--acc);background:rgba(91,140,255,.1);color:var(--acc);font-size:13px;cursor:pointer;font-weight:600}
+.partial-btn:hover{background:var(--acc);color:#fff}
 .more{display:block;width:100%;margin:16px 0 40px;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--txt);cursor:pointer;font-size:14px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1e2432;border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:100}
 .toast.on{opacity:1}
+
+/* 개발자 전용 검색 안내 배너 */
+.dev-banner{background:rgba(91,140,255,.08);border:1px solid var(--acc);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.dev-banner-text{font-size:14px;color:var(--txt);font-weight:600}
+.dev-banner-btn{padding:8px 14px;border-radius:8px;border:none;background:var(--acc);color:#fff;font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0}
+.dev-banner-btn:hover{opacity:.9}
 
 /* 모달 공통 스타일 */
 .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s ease}
@@ -44,6 +51,18 @@ mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
 .modal-overlay.active .modal{transform:translateY(0)}
 .modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--sub);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px}
 .modal-close:hover{color:var(--txt);background:var(--line)}
+
+/* 개발자 모달 전용 스타일 */
+.dev-modal{max-width:440px}
+.dev-header{font-size:18px;font-weight:700;color:var(--txt);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.dev-body{display:flex;flex-direction:column;gap:10px}
+.dev-menu-btn{width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--line);background:#101216;color:var(--txt);font-size:14px;text-align:left;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:border-color .15s}
+.dev-menu-btn:hover{border-color:var(--acc)}
+.dev-info-box{background:#101216;border:1px solid var(--line);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--sub);display:none;margin-top:-2px}
+.dev-sub-box{background:#101216;border:1px solid var(--line);border-radius:10px;padding:10px;display:none;margin-top:-2px;gap:8px;flex-direction:column}
+.dev-sub-btn{width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:13px;text-align:left;cursor:pointer;transition:border-color .15s}
+.dev-sub-btn:hover{border-color:var(--acc);color:var(--acc)}
+.dev-footer{margin-top:20px;display:flex;justify-content:flex-end}
 
 /* 공지사항 모달 전용 스타일 */
 .notice-modal{max-width:480px}
@@ -89,14 +108,12 @@ mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
 <header><div class="wrap">
 <div class="titlerow">
   <h1>📚 만찾<span>서만창 도서 검색 시스템</span></h1>
-  <div class="tools">
-    <button class="btn" id="upBtn">데이터베이스 수동 업로드 (*.csv)</button>
+  <div>
     <button class="btn ghost" id="resetBtn" hidden>↩ 기본 데이터로</button>
-    <input type="file" id="file" accept=".csv,text/csv" hidden>
   </div>
 </div>
 <div class="searchbar">
-  <input id="q" type="search" placeholder="도서명 · 저자 · 출판사 · 위치 검색 (예: 노다메, 대원씨아이, A1-A2)" autocomplete="off">
+  <input id="q" type="search" placeholder="도서명 · 저자 · 출판사 · 위치 검색" autocomplete="off">
   <select id="field">
     <option value="all">전체</option><option value="0">도서명</option>
     <option value="1">저자</option><option value="2">출판사</option><option value="3">위치</option>
@@ -107,14 +124,55 @@ mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
 </div>
 </div></header>
 <main>
+  <!-- 개발자 전용 검색 안내 배너 -->
+  <div class="dev-banner" id="devBanner" style="display:none">
+    <div class="dev-banner-text">🛠️ 개발자 전용 모드에 접근할 수 있습니다.</div>
+    <button class="dev-banner-btn" id="openDevModalBtn">개발자 메뉴 열기</button>
+  </div>
+
   <div class="src" id="src"></div>
   <div class="stat" id="stat"></div>
   <table><thead><tr><th style="width:44%">도서명</th><th class="hide-sm">저자</th><th class="hide-sm">출판사</th><th style="width:90px">위치</th></tr></thead>
   <tbody id="rows"></tbody></table>
-  <div class="empty" id="empty" hidden>검색 결과가 없습니다.</div>
+  <div class="empty" id="empty" hidden></div>
   <button class="more" id="more" hidden>더 보기</button>
 </main>
 <div class="toast" id="toast"></div>
+
+<!-- 개발자 전용 모달 -->
+<div class="modal-overlay" id="devOverlay">
+  <div class="modal dev-modal">
+    <button class="modal-close" id="devClose">✕</button>
+    <div class="dev-header">⚙️ 개발자 메뉴</div>
+    <div class="dev-body">
+      <!-- 1. 업로드 -->
+      <button class="dev-menu-btn" id="devUploadBtn">
+        <span>📁 데이터 수동 업로드 (*.csv)</span>
+        <span style="font-size:12px; color:var(--sub)">선택</span>
+      </button>
+      <input type="file" id="devFileInput" accept=".csv,text/csv" hidden>
+
+      <!-- 2. 버전 정보 -->
+      <button class="dev-menu-btn" id="devVersionToggleBtn">
+        <span>ℹ️ 버전 정보</span>
+        <span style="font-size:12px; color:var(--sub)" id="devVersionArrow">▼</span>
+      </button>
+      <div class="dev-info-box" id="devVersionBox">2026년 8월 23일 개발 버전, Alpha</div>
+
+      <!-- 3. 기타 (이스터에그) -->
+      <button class="dev-menu-btn" id="devEtcToggleBtn">
+        <span>⚙️ 기타</span>
+        <span style="font-size:12px; color:var(--sub)" id="devEtcArrow">▼</span>
+      </button>
+      <div class="dev-sub-box" id="devEtcBox">
+        <button class="dev-sub-btn" id="easterEgg1Btn">🐣 Easter Egg #1</button>
+      </div>
+    </div>
+    <div class="dev-footer">
+      <button class="btn" id="devModalCloseBtn">닫기</button>
+    </div>
+  </div>
+</div>
 
 <!-- 공지사항 팝업 모달 -->
 <div class="modal-overlay" id="noticeOverlay">
@@ -171,6 +229,7 @@ if (typeof KAKAO_REST_API_KEY === 'undefined') {
 let currentData = [];
 let filteredData = [];
 let displayCount = 50;
+let currentHighlightTerms = [];
 
 async function checkNotice() {
   try {
@@ -182,9 +241,7 @@ async function checkNotice() {
       document.getElementById('noticeBody').innerText = text.trim();
       document.getElementById('noticeOverlay').classList.add('active');
     }
-  } catch (err) {
-    // notice.txt 예외 처리
-  }
+  } catch (err) {}
 }
 
 function closeNotice() {
@@ -252,20 +309,63 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('on'), 2500);
 }
 
-function filterAndRender() {
+function getSubstrings(str) {
+  const clean = str.replace(/\s+/g, '');
+  const chunks = new Set();
+  const minLen = clean.length >= 4 ? 2 : Math.max(2, clean.length - 1);
+  
+  for (let len = clean.length - 1; len >= minLen; len--) {
+    for (let i = 0; i <= clean.length - len; i++) {
+      chunks.add(clean.substring(i, i + len));
+    }
+  }
+  return Array.from(chunks);
+}
+
+function filterAndRender(isPartialMode = false) {
   const q = document.getElementById('q').value.trim().toLowerCase();
   const field = document.getElementById('field').value;
   const sort = document.getElementById('sort').value;
+  const devBanner = document.getElementById('devBanner');
 
-  filteredData = currentData.filter(row => {
-    if (!q) return true;
-    if (field === 'all') {
-      return row.some(cell => cell.toLowerCase().includes(q));
-    } else {
-      const idx = parseInt(field, 10);
-      return row[idx] && row[idx].toLowerCase().includes(q);
-    }
-  });
+  if (q === '개발자') {
+    devBanner.style.display = 'flex';
+  } else {
+    devBanner.style.display = 'none';
+  }
+
+  currentHighlightTerms = [];
+
+  if (!q) {
+    filteredData = [...currentData];
+  } else if (!isPartialMode) {
+    currentHighlightTerms = [q];
+    filteredData = currentData.filter(row => {
+      if (field === 'all') {
+        return row.some(cell => cell.toLowerCase().includes(q));
+      } else {
+        const idx = parseInt(field, 10);
+        return row[idx] && row[idx].toLowerCase().includes(q);
+      }
+    });
+  } else {
+    const subTerms = getSubstrings(q);
+    currentHighlightTerms = subTerms.length > 0 ? subTerms : [q];
+
+    filteredData = currentData.filter(row => {
+      const checkCell = (cell) => {
+        const lowerCell = cell.toLowerCase();
+        return subTerms.some(term => lowerCell.includes(term));
+      };
+
+      if (field === 'all') {
+        return row.some(cell => checkCell(cell));
+      } else {
+        const idx = parseInt(field, 10);
+        return row[idx] && checkCell(row[idx]);
+      }
+    });
+  }
 
   filteredData.sort((a, b) => {
     if (sort === 'loc') return a[3].localeCompare(b[3], 'ko');
@@ -275,10 +375,10 @@ function filterAndRender() {
   });
 
   displayCount = 50;
-  renderTable();
+  renderTable(isPartialMode);
 }
 
-function renderTable() {
+function renderTable(isPartialMode = false) {
   const rowsEl = document.getElementById('rows');
   const statEl = document.getElementById('stat');
   const emptyEl = document.getElementById('empty');
@@ -291,6 +391,16 @@ function renderTable() {
     rowsEl.innerHTML = '';
     emptyEl.hidden = false;
     moreBtn.hidden = true;
+
+    if (q && !isPartialMode && q.length >= 2) {
+      emptyEl.innerHTML = `
+        검색 결과가 없습니다.<br>
+        <span style="font-size:13px; color:var(--sub);">일부 일치하는 경우도 검색할까요?</span><br>
+        <button class="partial-btn" onclick="filterAndRender(true)">일부 일치 검색 실행</button>
+      `;
+    } else {
+      emptyEl.innerHTML = '검색 결과가 없습니다.';
+    }
     return;
   }
 
@@ -298,8 +408,11 @@ function renderTable() {
   const slice = filteredData.slice(0, displayCount);
 
   const highlight = (text) => {
-    if (!q) return text;
-    const reg = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    if (!currentHighlightTerms || currentHighlightTerms.length === 0) return text;
+    const sortedTerms = [...currentHighlightTerms].sort((a, b) => b.length - a.length);
+    const pattern = sortedTerms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+    if (!pattern) return text;
+    const reg = new RegExp(`(${pattern})`, 'gi');
     return text.replace(reg, '<mark>$1</mark>');
   };
 
@@ -315,11 +428,80 @@ function renderTable() {
   moreBtn.hidden = displayCount >= filteredData.length;
 }
 
+/* 개발자 모달 컨트롤 */
+const devOverlay = document.getElementById('devOverlay');
+const devVersionBox = document.getElementById('devVersionBox');
+const devVersionArrow = document.getElementById('devVersionArrow');
+const devEtcBox = document.getElementById('devEtcBox');
+const devEtcArrow = document.getElementById('devEtcArrow');
+
+function openDevModal() {
+  devOverlay.classList.add('active');
+}
+
+function closeDevModal() {
+  devOverlay.classList.remove('active');
+  devVersionBox.style.display = 'none';
+  devVersionArrow.innerText = '▼';
+  devEtcBox.style.display = 'none';
+  devEtcArrow.innerText = '▼';
+}
+
+document.getElementById('openDevModalBtn').onclick = openDevModal;
+document.getElementById('devClose').onclick = closeDevModal;
+document.getElementById('devModalCloseBtn').onclick = closeDevModal;
+devOverlay.onclick = (e) => {
+  if (e.target.id === 'devOverlay') closeDevModal();
+};
+
+/* 2. 버전 정보 토글 */
+document.getElementById('devVersionToggleBtn').onclick = () => {
+  const isHidden = devVersionBox.style.display === 'none' || !devVersionBox.style.display;
+  devVersionBox.style.display = isHidden ? 'block' : 'none';
+  devVersionArrow.innerText = isHidden ? '▲' : '▼';
+};
+
+/* 3. 기타 토글 및 이스터에그 */
+document.getElementById('devEtcToggleBtn').onclick = () => {
+  const isHidden = devEtcBox.style.display === 'none' || !devEtcBox.style.display;
+  devEtcBox.style.display = isHidden ? 'flex' : 'none';
+  devEtcArrow.innerText = isHidden ? '▲' : '▼';
+};
+
+document.getElementById('easterEgg1Btn').onclick = () => {
+  window.open("https://www.nyan.cat/", "_blank");
+};
+
+/* 1. 파일 업로드 */
+const devFileInput = document.getElementById('devFileInput');
+document.getElementById('devUploadBtn').onclick = () => devFileInput.click();
+
+devFileInput.onchange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    const text = evt.target.result;
+    const parsed = parseCSV(text);
+    if (parsed.length === 0) {
+      showToast('CSV 형식이 올바르지 않거나 데이터가 없습니다.');
+      return;
+    }
+    currentData = parsed;
+    document.getElementById('src').innerHTML = `데이터 출처: <b>${file.name}</b> (${currentData.length}건)`;
+    document.getElementById('resetBtn').hidden = false;
+    filterAndRender(false);
+    closeDevModal();
+    showToast('CSV 파일이 적용되었습니다.');
+  };
+  reader.readAsText(file, 'UTF-8');
+};
+
 function parseLocationTargets(locStr) {
   if (!locStr) return [];
   const targets = new Set();
   const cleanStr = locStr.toUpperCase().trim();
-
   const parts = cleanStr.split(/[\s,]+/);
 
   parts.forEach(part => {
@@ -494,48 +676,26 @@ document.getElementById('modalClose').onclick = closeModal;
 document.getElementById('modalOverlay').onclick = (e) => {
   if (e.target.id === 'modalOverlay') closeModal();
 };
+
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     closeModal();
     closeNotice();
+    closeDevModal();
   }
 });
 
-document.getElementById('q').addEventListener('input', filterAndRender);
-document.getElementById('field').addEventListener('change', filterAndRender);
-document.getElementById('sort').addEventListener('change', filterAndRender);
+document.getElementById('q').addEventListener('input', () => filterAndRender(false));
+document.getElementById('field').addEventListener('change', () => filterAndRender(false));
+document.getElementById('sort').addEventListener('change', () => filterAndRender(false));
 
 document.getElementById('more').onclick = () => {
   displayCount += 50;
   renderTable();
 };
 
-const fileInput = document.getElementById('file');
-document.getElementById('upBtn').onclick = () => fileInput.click();
-
-fileInput.onchange = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = (evt) => {
-    const text = evt.target.result;
-    const parsed = parseCSV(text);
-    if (parsed.length === 0) {
-      showToast('CSV 형식이 올바르지 않거나 데이터가 없습니다.');
-      return;
-    }
-    currentData = parsed;
-    document.getElementById('src').innerHTML = `데이터 출처: <b>${file.name}</b> (${currentData.length}건)`;
-    document.getElementById('resetBtn').hidden = false;
-    filterAndRender();
-    showToast('CSV 파일이 적용되었습니다.');
-  };
-  reader.readAsText(file, 'UTF-8');
-};
-
 document.getElementById('resetBtn').onclick = () => {
-  fileInput.value = '';
+  devFileInput.value = '';
   loadDefaultCSV();
   showToast('기본 CSV 데이터로 돌아왔습니다.');
 };
