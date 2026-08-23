@@ -21,9 +21,6 @@ h1 span{color:var(--sub);font-size:13px;font-weight:400;margin-left:8px}
 input[type=search]{flex:1;min-width:220px;padding:12px 14px;font-size:15px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--txt);outline:none}
 input[type=search]:focus{border-color:var(--acc)}
 select{padding:12px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:14px}
-.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;max-height:96px;overflow:auto}
-.chip{padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--sub);font-size:12px;cursor:pointer}
-.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
 main{max-width:980px;margin:0 auto;padding:16px}
 .src{font-size:12px;color:var(--sub);margin-bottom:10px}
 .src b{color:var(--acc2)}
@@ -31,14 +28,52 @@ main{max-width:980px;margin:0 auto;padding:16px}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 th{position:sticky;top:0;color:var(--sub);font-size:12px;font-weight:600;background:var(--bg)}
-tr:hover td{background:#151923}
+tr.clickable-row{cursor:pointer;transition:background .15s}
+tr.clickable-row:hover td{background:#151923}
 .loc{display:inline-block;padding:3px 9px;border-radius:6px;background:#1d2a1f;color:var(--acc2);font-weight:700;font-size:12px;letter-spacing:.5px}
 mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
 .empty{text-align:center;color:var(--sub);padding:48px 0}
 .more{display:block;width:100%;margin:16px 0 40px;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--txt);cursor:pointer;font-size:14px}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1e2432;border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;transition:.25s;pointer-events:none}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1e2432;border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:100}
 .toast.on{opacity:1}
-@media(max-width:560px){.hide-sm{display:none}}
+
+/* 모달 팝업 및 슬림 책장 그래픽 스타일 */
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s ease}
+.modal-overlay.active{opacity:1;pointer-events:auto}
+.modal{background:var(--card);border:1px solid var(--line);border-radius:16px;width:92%;max-width:540px;padding:24px;position:relative;box-shadow:0 20px 40px rgba(0,0,0,.5);transform:translateY(10px);transition:transform .2s ease;max-height:90vh;overflow-y:auto}
+.modal-overlay.active .modal{transform:translateY(0)}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--sub);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px}
+.modal-close:hover{color:var(--txt);background:var(--line)}
+
+.modal-body{display:flex;gap:20px;margin-top:8px}
+.cover-box{width:110px;height:160px;background:#101216;border:1px solid var(--line);border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.cover-box img{width:100%;height:100%;object-fit:cover;display:none}
+.cover-box img.loaded{display:block}
+.cover-placeholder{color:var(--sub);font-size:11px;text-align:center;padding:8px}
+.modal-info{flex:1;display:flex;flex-direction:column;gap:8px}
+.modal-title{font-size:16px;font-weight:700;line-height:1.4;margin:0;color:var(--txt)}
+.info-item{font-size:13px;color:var(--sub)}
+.info-item strong{color:var(--txt);font-weight:600;display:inline-block;width:50px}
+
+/* 도서 소개 영역 추가 */
+.summary-section{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.summary-title{font-size:12px;font-weight:600;color:var(--sub);margin-bottom:6px}
+.summary-content{font-size:13px;color:#c0c6d4;line-height:1.5;max-height:90px;overflow-y:auto;white-space:pre-line;background:#101216;padding:8px 12px;border-radius:6px;border:1px solid var(--line)}
+
+/* 책장 시각화 영역 */
+.shelf-section{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.shelf-title{font-size:12px;font-weight:600;color:var(--sub);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.shelf-title span{color:var(--acc2);font-weight:700}
+
+.shelf-grid{display:grid;grid-template-columns:repeat(6, 1fr);gap:3px;background:#101216;padding:6px;border-radius:8px;border:1px solid var(--line)}
+.shelf-cell{aspect-ratio:4.4/1;background:#1a1e28;border:1px solid #282e3d;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#576071;font-weight:600;transition:all .2s ease}
+.shelf-cell.active{background:var(--acc2);color:#000;border-color:var(--acc2);font-weight:800;box-shadow:0 0 6px rgba(34,197,94,.5);transform:scale(1.05);z-index:1}
+
+@media(max-width:560px){
+  .hide-sm{display:none}
+  .modal-body{flex-direction:column;align-items:center}
+  .modal-info{width:100%}
+}
 </style>
 </head>
 <body>
@@ -61,7 +96,6 @@ mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
     <option value="loc">위치순</option><option value="title">도서명순</option><option value="author">저자순</option>
   </select>
 </div>
-<div class="chips" id="chips"></div>
 </div></header>
 <main>
   <div class="src" id="src"></div>
@@ -73,13 +107,48 @@ mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
 </main>
 <div class="toast" id="toast"></div>
 
+<!-- 도서 상세 정보 모달 -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-body">
+      <div class="cover-box">
+        <span class="cover-placeholder" id="coverLoading">표지 불러오는 중...</span>
+        <img id="coverImg" alt="책 표지">
+      </div>
+      <div class="modal-info">
+        <h2 class="modal-title" id="mTitle">-</h2>
+        <div class="info-item"><strong>저자</strong> <span id="mAuthor">-</span></div>
+        <div class="info-item"><strong>출판사</strong> <span id="mPublisher">-</span></div>
+        <div class="info-item" style="margin-top:auto"><strong>위치</strong> <span class="loc" id="mLoc">-</span></div>
+      </div>
+    </div>
+    
+    <!-- 도서 소개 영역 -->
+    <div class="summary-section">
+      <div class="summary-title">📖 도서 소개</div>
+      <div class="summary-content" id="mSummary">도서 정보를 불러오는 중...</div>
+    </div>
+
+    <!-- 책장 위치 시각화 영역 -->
+    <div class="shelf-section">
+      <div class="shelf-title">
+        <span>📍 서가 위치 안내</span>
+        <span id="shelfTargetLabel">-</span>
+      </div>
+      <div class="shelf-grid" id="shelfGrid"></div>
+    </div>
+  </div>
+</div>
+
 <script>
+// Kakao REST API Key 설정
+const KAKAO_REST_API_KEY = "";
+
 let currentData = [];
 let filteredData = [];
 let displayCount = 50;
-let activeChip = null;
 
-// CSV 파서 함수 (큰따옴표 및 쉼표 예외 처리)
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   if (lines.length < 2) return [];
@@ -113,49 +182,25 @@ function parseCSV(text) {
   return result;
 }
 
-// 외부 database.csv 로드
 async function loadDefaultCSV() {
   try {
     const res = await fetch('database.csv');
     if (!res.ok) throw new Error('database.csv 로드 실패');
     const text = await res.text();
     currentData = parseCSV(text);
-    document.getElementById('src').innerHTML = `데이터 출처: <b>기본 database.csv</b> (${currentData.length}건)`;
+    
+    if (currentData.length > 0) {
+      document.getElementById('src').innerHTML = `데이터 출처: <b>기본 database.csv</b> (${currentData.length}건)`;
+    } else {
+      document.getElementById('src').innerText = '';
+    }
     document.getElementById('resetBtn').hidden = true;
-    initChips();
     filterAndRender();
   } catch (err) {
-    showToast('database.csv 파일을 찾을 수 없습니다.');
-    document.getElementById('src').innerText = '데이터를 불러올 수 없습니다.';
+    document.getElementById('src').innerText = '';
   }
 }
 
-// 위치 칩(Chip) 생성
-function initChips() {
-  const locs = [...new Set(currentData.map(r => r[3]))].sort();
-  const chipsEl = document.getElementById('chips');
-  chipsEl.innerHTML = '';
-  
-  locs.forEach(loc => {
-    const chip = document.createElement('button');
-    chip.className = 'chip';
-    chip.innerText = loc;
-    chip.onclick = () => {
-      if (activeChip === loc) {
-        activeChip = null;
-        chip.classList.remove('on');
-      } else {
-        document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
-        activeChip = loc;
-        chip.classList.add('on');
-      }
-      filterAndRender();
-    };
-    chipsEl.appendChild(chip);
-  });
-}
-
-// 토스트 메시지
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.innerText = msg;
@@ -163,15 +208,12 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('on'), 2500);
 }
 
-// 검색 및 정렬
 function filterAndRender() {
   const q = document.getElementById('q').value.trim().toLowerCase();
   const field = document.getElementById('field').value;
   const sort = document.getElementById('sort').value;
 
   filteredData = currentData.filter(row => {
-    if (activeChip && row[3] !== activeChip) return false;
-    
     if (!q) return true;
     if (field === 'all') {
       return row.some(cell => cell.toLowerCase().includes(q));
@@ -192,7 +234,6 @@ function filterAndRender() {
   renderTable();
 }
 
-// 테이블 렌더링
 function renderTable() {
   const rowsEl = document.getElementById('rows');
   const statEl = document.getElementById('stat');
@@ -218,8 +259,8 @@ function renderTable() {
     return text.replace(reg, '<mark>$1</mark>');
   };
 
-  rowsEl.innerHTML = slice.map(row => `
-    <tr>
+  rowsEl.innerHTML = slice.map((row, index) => `
+    <tr class="clickable-row" onclick="openModal(${index})">
       <td>${highlight(row[0])}</td>
       <td class="hide-sm">${highlight(row[1])}</td>
       <td class="hide-sm">${highlight(row[2])}</td>
@@ -230,7 +271,192 @@ function renderTable() {
   moreBtn.hidden = displayCount >= filteredData.length;
 }
 
-// 이벤트 리스너 설정
+function parseLocationTargets(locStr) {
+  if (!locStr) return [];
+  const targets = new Set();
+  const cleanStr = locStr.toUpperCase().trim();
+
+  const parts = cleanStr.split(/[\s,]+/);
+
+  parts.forEach(part => {
+    const rangeMatch = part.match(/^([A-F])(\d+)[-~]([A-F])?(\d+)$/);
+    if (rangeMatch) {
+      const startCol = rangeMatch[1];
+      const startRow = parseInt(rangeMatch[2], 10);
+      const endCol = rangeMatch[3] || startCol;
+      const endRow = parseInt(rangeMatch[4], 10);
+
+      const colStartIdx = startCol.charCodeAt(0);
+      const colEndIdx = endCol.charCodeAt(0);
+
+      for (let c = colStartIdx; c <= colEndIdx; c++) {
+        const colChar = String.fromCharCode(c);
+        const rMin = Math.min(startRow, endRow);
+        const rMax = Math.max(startRow, endRow);
+        for (let r = rMin; r <= rMax; r++) {
+          if (r >= 1 && r <= 8) {
+            targets.add(`${colChar}${r}`);
+          }
+        }
+      }
+    } else {
+      const singleMatch = part.match(/([A-F])(\d+)/);
+      if (singleMatch) {
+        const col = singleMatch[1];
+        const row = parseInt(singleMatch[2], 10);
+        if (row >= 1 && row <= 8) {
+          targets.add(`${col}${row}`);
+        }
+      }
+    }
+  });
+
+  return Array.from(targets);
+}
+
+function renderShelfGrid(activeLocStr) {
+  const gridEl = document.getElementById('shelfGrid');
+  const targetLabel = document.getElementById('shelfTargetLabel');
+  gridEl.innerHTML = '';
+
+  const activeTargets = parseLocationTargets(activeLocStr);
+  targetLabel.innerText = activeTargets.length > 0 ? activeTargets.join(', ') : activeLocStr;
+
+  const cols = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+  for (let r = 1; r <= 8; r++) {
+    for (let c = 0; c < cols.length; c++) {
+      const cellId = `${cols[c]}${r}`;
+      const cell = document.createElement('div');
+      cell.className = 'shelf-cell';
+      cell.innerText = cellId;
+
+      if (activeTargets.includes(cellId)) {
+        cell.classList.add('active');
+      }
+
+      gridEl.appendChild(cell);
+    }
+  }
+}
+
+/* Kakao API로 표지 이미지 및 도서 소개(contents) 조회 */
+async function fetchKakaoBookData(query) {
+  if (!KAKAO_REST_API_KEY || KAKAO_REST_API_KEY === "YOUR_KAKAO_REST_API_KEY") {
+    return null;
+  }
+
+  try {
+    const url = `https://dapi.kakao.com/v3/search/book?target=title&size=1&query=${encodeURIComponent(query)}`;
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `KakaoAK ${KAKAO_REST_API_KEY}`
+      }
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+
+    if (data.documents && data.documents.length > 0) {
+      const doc = data.documents[0];
+      return {
+        thumbnail: doc.thumbnail || null,
+        contents: doc.contents || null
+      };
+    }
+  } catch (e) {
+    console.error("Kakao API 로드 에러:", e);
+  }
+  return null;
+}
+
+async function openModal(index) {
+  const book = filteredData[index];
+  if (!book) return;
+
+  const title = book[0];
+  const author = book[1];
+  const publisher = book[2];
+  const loc = book[3];
+
+  document.getElementById('mTitle').innerText = title;
+  document.getElementById('mAuthor').innerText = author || '-';
+  document.getElementById('mPublisher').innerText = publisher || '-';
+  document.getElementById('mLoc').innerText = loc;
+
+  renderShelfGrid(loc);
+
+  const imgEl = document.getElementById('coverImg');
+  const loadingEl = document.getElementById('coverLoading');
+  const summaryEl = document.getElementById('mSummary');
+  
+  imgEl.classList.remove('loaded');
+  imgEl.src = '';
+  loadingEl.innerText = '표지 불러오는 중...';
+  loadingEl.style.display = 'block';
+  summaryEl.innerText = '도서 정보를 불러오는 중...';
+
+  document.getElementById('modalOverlay').classList.add('active');
+
+  let formattedTitle = title
+    .replace(/[\(\[\{]\s*0*(\d+)\s*[\)\]\}]/g, ' $1권 ')
+    .replace(/\([^\d]*?\)/g, '')
+    .replace(/\[[^\d]*?\]/g, '')
+    .replace(/\s+0*(\d+)$/g, ' $1권')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!formattedTitle) formattedTitle = title.trim();
+
+  const baseTitle = title
+    .replace(/[\(\[\{].*?[\)\]\}]/g, '')
+    .replace(/\s+\d+$/g, '')
+    .trim();
+
+  let bookData = await fetchKakaoBookData(formattedTitle);
+
+  if ((!bookData || !bookData.thumbnail) && baseTitle !== formattedTitle) {
+    const fallbackData = await fetchKakaoBookData(baseTitle);
+    if (fallbackData) {
+      bookData = {
+        thumbnail: bookData?.thumbnail || fallbackData.thumbnail,
+        contents: bookData?.contents || fallbackData.contents
+      };
+    }
+  }
+
+  // 표지 이미지 출력 처리
+  if (bookData && bookData.thumbnail) {
+    imgEl.src = bookData.thumbnail;
+    imgEl.onload = () => {
+      loadingEl.style.display = 'none';
+      imgEl.classList.add('loaded');
+    };
+  } else {
+    loadingEl.innerText = '표지 이미지 없음';
+  }
+
+  // 도서 소개 텍스트 출력 처리
+  if (bookData && bookData.contents) {
+    summaryEl.innerText = bookData.contents;
+  } else {
+    summaryEl.innerText = '도서 소개 정보가 없습니다.';
+  }
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+}
+
+document.getElementById('modalClose').onclick = closeModal;
+document.getElementById('modalOverlay').onclick = (e) => {
+  if (e.target.id === 'modalOverlay') closeModal();
+};
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
 document.getElementById('q').addEventListener('input', filterAndRender);
 document.getElementById('field').addEventListener('change', filterAndRender);
 document.getElementById('sort').addEventListener('change', filterAndRender);
@@ -240,7 +466,6 @@ document.getElementById('more').onclick = () => {
   renderTable();
 };
 
-// 상단 CSV 업로드 버튼
 const fileInput = document.getElementById('file');
 document.getElementById('upBtn').onclick = () => fileInput.click();
 
@@ -257,25 +482,20 @@ fileInput.onchange = (e) => {
       return;
     }
     currentData = parsed;
-    activeChip = null;
     document.getElementById('src').innerHTML = `데이터 출처: <b>${file.name}</b> (${currentData.length}건)`;
     document.getElementById('resetBtn').hidden = false;
-    initChips();
     filterAndRender();
     showToast('CSV 파일이 적용되었습니다.');
   };
   reader.readAsText(file, 'UTF-8');
 };
 
-// 기본 데이터 복원 버튼
 document.getElementById('resetBtn').onclick = () => {
   fileInput.value = '';
-  activeChip = null;
   loadDefaultCSV();
   showToast('기본 CSV 데이터로 돌아왔습니다.');
 };
 
-// 페이지 로드 시 database.csv 자동 로드
 loadDefaultCSV();
 </script>
 </body>
