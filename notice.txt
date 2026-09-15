@@ -1,4 +1,3 @@
 SogangComicsClub Book Search
-Closed Beta ver.  * Not for public use yet *
-
-테스트 공지입니다.
+Open Beta
+시연에 참여해주셔서 감사합니다. 많은 피드백 부탁드립니다.
