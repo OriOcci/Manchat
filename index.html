@@ -19,9 +19,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="만찾">
 
-<!-- iOS 홈 화면 아이콘 -->
-<link rel="apple-touch-icon" href="apple-touch-icon-180x180.png">
-
 <!-- Gothic A1 웹폰트 로드 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -115,7 +112,7 @@ mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
 .info-item{font-size:13px;color:var(--sub)}
 .info-item strong{color:var(--txt);font-weight:600;display:inline-block;width:50px}
 
-/* 도서 소개 영역 */
+/* 도서 상세 세부 영역 (태그, 한마디, 도서 소개) */
 .summary-section{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
 .summary-title{font-size:12px;font-weight:600;color:var(--sub);margin-bottom:6px}
 .summary-content{font-size:13px;color:#c0c6d4;line-height:1.5;max-height:90px;overflow-y:auto;white-space:pre-line;background:#101216;padding:8px 12px;border-radius:6px;border:1px solid var(--line)}
@@ -134,10 +131,10 @@ mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
   border-radius:8px;
   border:1px solid var(--line);
   width:100%;
-  overflow-x:auto; /* 예외적인 극소형 화면 대응 */
+  overflow-x:auto;
 }
 .shelf-cell{
-  aspect-ratio:3.5/1; /* 모바일 대응 비율 조정 */
+  aspect-ratio:3.5/1;
   background:#1a1e28;
   border:1px solid #282e3d;
   border-radius:3px;
@@ -148,7 +145,7 @@ mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
   color:#576071;
   font-weight:600;
   transition:all .2s ease;
-  min-width:0; /* 그리드 항목 overflow 방지 */
+  min-width:0;
 }
 .shelf-cell.active{background:var(--acc2);color:#000;border-color:var(--acc2);font-weight:800;box-shadow:0 0 6px rgba(34,197,94,.5);transform:scale(1.05);z-index:1}
 
@@ -158,7 +155,6 @@ mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
   .modal-body{flex-direction:column;align-items:center}
   .modal-info{width:100%}
   
-  /* 모바일 반응형 책장 그리드 최적화 */
   .shelf-grid{padding:4px;gap:2px}
   .shelf-cell{font-size:8px;aspect-ratio:3/1}
 }
@@ -267,6 +263,18 @@ mark{background:#3b4a7a;color:#fff;border-radius:3px;padding:0 2px}
       </div>
     </div>
     
+    <!-- 태그 영역 -->
+    <div class="summary-section" id="tagSection" style="display:none">
+      <div class="summary-title">🏷️ 태그</div>
+      <div class="summary-content" id="mTag"></div>
+    </div>
+
+    <!-- 한마디 영역 -->
+    <div class="summary-section" id="wordsSection" style="display:none">
+      <div class="summary-title">💬 한마디</div>
+      <div class="summary-content" id="mWords"></div>
+    </div>
+
     <!-- 도서 소개 영역 -->
     <div class="summary-section">
       <div class="summary-title">📖 도서 소개</div>
@@ -318,21 +326,26 @@ document.getElementById('noticeOverlay').onclick = (e) => {
 
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
-  if (lines.length < 2) return [];
-  
-  const result = [];
-  for (let i = 1; i < lines.length; i++) {
+  if (lines.length === 0) return [];
+
+  const rawRows = [];
+  for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (!line.trim()) continue;
-    
+
     const row = [];
     let insideQuote = false;
     let entry = '';
-    
+
     for (let j = 0; j < line.length; j++) {
       const char = line[j];
       if (char === '"') {
-        insideQuote = !insideQuote;
+        if (insideQuote && line[j + 1] === '"') {
+          entry += '"';
+          j++;
+        } else {
+          insideQuote = !insideQuote;
+        }
       } else if (char === ',' && !insideQuote) {
         row.push(entry.trim().replace(/^"|"$/g, ''));
         entry = '';
@@ -341,11 +354,100 @@ function parseCSV(text) {
       }
     }
     row.push(entry.trim().replace(/^"|"$/g, ''));
-    
-    if (row.length >= 4) {
-      result.push(row.slice(0, 4));
+    rawRows.push(row);
+  }
+
+  if (rawRows.length === 0) return [];
+
+  // 컬럼 인덱스 맵핑
+  const colMap = {
+    title: 0,
+    author: 1,
+    series: 2,
+    missing: 3,
+    tag: 4,
+    words: 5,
+    comment: 6,
+    publisher: -1,
+    loc: -1
+  };
+
+  const headerRow = rawRows[0].map(c => c.toLowerCase().trim());
+  const isHeader = headerRow.some(c => 
+    ['title', '제목', '도서명', 'author', '저자', 'series', '시리즈', 'missing', '결권', 'tag', '태그', 'words', '정보'].includes(c)
+  );
+
+  let startIndex = 0;
+  if (isHeader) {
+    startIndex = 1;
+    headerRow.forEach((col, idx) => {
+      if (['title', '제목', '도서명'].includes(col)) colMap.title = idx;
+      else if (['author', '저자', '지은이'].includes(col)) colMap.author = idx;
+      else if (['series', '시리즈', '총권수'].includes(col)) colMap.series = idx;
+      else if (['missing', '결권', '미싱', '없는권수'].includes(col)) colMap.missing = idx;
+      else if (['tag', 'tags', '태그', '해시태그'].includes(col)) colMap.tag = idx;
+      else if (['words', 'word', '정보', '도서소개', '소개'].includes(col)) colMap.words = idx;
+      else if (['publisher', '출판사'].includes(col)) colMap.publisher = idx;
+      else if (['loc', 'location', '위치', '서가'].includes(col)) colMap.loc = idx;
+      else if (['comment', '주석', '메모'].includes(col)) colMap.comment = idx;
+    });
+  }
+
+  function parseMissingSet(str) {
+    const set = new Set();
+    if (!str) return set;
+    const parts = str.toString().split(/[,;\s]+/);
+    for (const p of parts) {
+      const trimmed = p.trim();
+      if (!trimmed) continue;
+      if (trimmed.includes('~') || trimmed.includes('-')) {
+        const range = trimmed.split(/[-~]/).map(n => parseInt(n.trim(), 10));
+        if (range.length === 2 && !isNaN(range[0]) && !isNaN(range[1])) {
+          const min = Math.min(range[0], range[1]);
+          const max = Math.max(range[0], range[1]);
+          for (let k = min; k <= max; k++) set.add(k);
+        }
+      } else {
+        const val = parseInt(trimmed, 10);
+        if (!isNaN(val)) set.add(val);
+      }
+    }
+    return set;
+  }
+
+  const result = [];
+
+  for (let i = startIndex; i < rawRows.length; i++) {
+    const row = rawRows[i];
+    const baseTitle = row[colMap.title] || '';
+    if (!baseTitle) continue;
+
+    const author = row[colMap.author] || '';
+    const seriesRaw = colMap.series !== -1 ? row[colMap.series] : '1';
+    const missingRaw = colMap.missing !== -1 ? row[colMap.missing] : '';
+    const tag = colMap.tag !== -1 ? (row[colMap.tag] || '') : '';
+    const words = colMap.words !== -1 ? (row[colMap.words] || '') : '';
+    const publisher = colMap.publisher !== -1 ? (row[colMap.publisher] || '-') : '-';
+    const loc = colMap.loc !== -1 ? (row[colMap.loc] || '-') : '-';
+
+    let seriesCount = parseInt(seriesRaw, 10);
+    if (isNaN(seriesCount) || seriesCount < 1) seriesCount = 1;
+
+    const missingSet = parseMissingSet(missingRaw);
+
+    if (seriesCount > 1) {
+      for (let vol = 1; vol <= seriesCount; vol++) {
+        if (missingSet.has(vol)) continue;
+        const volTitle = `${baseTitle} (${vol})`;
+        result.push([volTitle, author, publisher, loc, tag, words]);
+      }
+    } else {
+      if (!missingSet.has(1)) {
+        result.push([baseTitle, author, publisher, loc, tag, words]);
+      }
     }
   }
+
   return result;
 }
 
@@ -398,11 +500,12 @@ function filterAndRender(isPartialMode = false) {
   currentHighlightTerms = [];
 
   if (!q) {
-    filteredData = [...currentData];
+    // 검색어가 입력되지 않은 경우 결과 목록을 비움
+    filteredData = [];
   } else if (!isPartialMode) {
     currentHighlightTerms = [q];
     filteredData = currentData.filter(row => {
-      return row.some(cell => cell.toLowerCase().includes(q));
+      return row.some(cell => cell && cell.toLowerCase().includes(q));
     });
   } else {
     const subTerms = getSubstrings(q);
@@ -410,6 +513,7 @@ function filterAndRender(isPartialMode = false) {
 
     filteredData = currentData.filter(row => {
       return row.some(cell => {
+        if (!cell) return false;
         const lowerCell = cell.toLowerCase();
         return subTerms.some(term => lowerCell.includes(term));
       });
@@ -418,9 +522,9 @@ function filterAndRender(isPartialMode = false) {
 
   filteredData.sort((a, b) => {
     const opts = { numeric: true, sensitivity: 'base' };
-    if (sort === 'loc') return a[3].localeCompare(b[3], 'ko', opts);
-    if (sort === 'title') return a[0].localeCompare(b[0], 'ko', opts);
-    if (sort === 'author') return a[1].localeCompare(b[1], 'ko', opts);
+    if (sort === 'loc') return (a[3] || '').localeCompare(b[3] || '', 'ko', opts);
+    if (sort === 'title') return (a[0] || '').localeCompare(b[0] || '', 'ko', opts);
+    if (sort === 'author') return (a[1] || '').localeCompare(b[1] || '', 'ko', opts);
     return 0;
   });
 
@@ -433,8 +537,22 @@ function renderTable(isPartialMode = false) {
   const statEl = document.getElementById('stat');
   const emptyEl = document.getElementById('empty');
   const moreBtn = document.getElementById('more');
+  const tableEl = document.querySelector('table');
   const q = document.getElementById('q').value.trim();
 
+  // 검색어가 없을 경우 테이블을 숨기고 "환영합니다" 표시
+  if (!q) {
+    if (tableEl) tableEl.style.display = 'none';
+    statEl.innerText = '';
+    rowsEl.innerHTML = '';
+    emptyEl.hidden = false;
+    moreBtn.hidden = true;
+    emptyEl.innerHTML = '<div style="font-size:18px; font-weight:600; color:var(--sub); padding:80px 0;">환영합니다</div>';
+    return;
+  }
+
+  // 검색어가 있을 경우 테이블 출력
+  if (tableEl) tableEl.style.display = '';
   statEl.innerText = `검색 결과: ${filteredData.length}건`;
 
   if (filteredData.length === 0) {
@@ -458,6 +576,7 @@ function renderTable(isPartialMode = false) {
   const slice = filteredData.slice(0, displayCount);
 
   const highlight = (text) => {
+    if (!text) return '';
     if (!currentHighlightTerms || currentHighlightTerms.length === 0) return text;
     const sortedTerms = [...currentHighlightTerms].sort((a, b) => b.length - a.length);
     const pattern = sortedTerms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
@@ -652,17 +771,23 @@ async function openModal(index) {
   const author = book[1];
   const publisher = book[2];
   const loc = book[3];
+  const tag = book[4] || '';
+  const words = book[5] || '';
 
   document.getElementById('mTitle').innerText = title;
   document.getElementById('mAuthor').innerText = author || '-';
   document.getElementById('mPublisher').innerText = publisher || '-';
-  document.getElementById('mLoc').innerText = loc;
+  document.getElementById('mLoc').innerText = loc || '-';
 
   renderShelfGrid(loc);
 
   const imgEl = document.getElementById('coverImg');
   const loadingEl = document.getElementById('coverLoading');
   const summaryEl = document.getElementById('mSummary');
+  const tagSection = document.getElementById('tagSection');
+  const tagEl = document.getElementById('mTag');
+  const wordsSection = document.getElementById('wordsSection');
+  const wordsEl = document.getElementById('mWords');
   
   imgEl.classList.remove('loaded');
   imgEl.src = '';
@@ -670,9 +795,26 @@ async function openModal(index) {
   loadingEl.style.display = 'block';
   summaryEl.innerText = '도서 정보를 불러오는 중...';
 
+  if (tag && tag.trim().length > 0) {
+    const formattedTags = tag.split(/[,;\s]+/)
+      .filter(t => t.trim().length > 0)
+      .map(t => t.startsWith('#') ? t : '#' + t)
+      .join(' ');
+    tagEl.innerText = formattedTags;
+    tagSection.style.display = 'block';
+  } else {
+    tagSection.style.display = 'none';
+  }
+
+  if (words && words.trim().length > 0) {
+    wordsEl.innerText = words.trim();
+    wordsSection.style.display = 'block';
+  } else {
+    wordsSection.style.display = 'none';
+  }
+
   document.getElementById('modalOverlay').classList.add('active');
 
-  // 권수 (1), (2) -> 1권, 2권 변환 로직 유지
   let formattedTitle = title
     .replace(/[\(\[\{]\s*0*(\d+)\s*[\)\]\}]/g, ' $1권 ')
     .replace(/\([^\d]*?\)/g, '')
@@ -688,16 +830,13 @@ async function openModal(index) {
     .replace(/\s+\d+$/g, '')
     .trim();
 
-  // 1차: 변환된 제목 + 저자명으로 검색 (정확도 향상)
   let searchQuery = author && author !== '-' ? `${formattedTitle} ${author}` : formattedTitle;
   let bookData = await fetchKakaoBookData(searchQuery);
 
-  // 2차: 검색 실패 시 변환된 제목만으로 검색
   if ((!bookData || !bookData.thumbnail) && searchQuery !== formattedTitle) {
     bookData = await fetchKakaoBookData(formattedTitle);
   }
 
-  // 3차: 여전히 실패 시 기본 제목으로 fallback 검색
   if ((!bookData || !bookData.thumbnail) && baseTitle !== formattedTitle) {
     const fallbackData = await fetchKakaoBookData(baseTitle);
     if (fallbackData) {
@@ -746,8 +885,8 @@ document.getElementById('q').addEventListener('input', () => filterAndRender(fal
 document.getElementById('sort').addEventListener('change', () => filterAndRender(false));
 
 document.getElementById('searchForm').addEventListener('submit', (e) => {
-  e.preventDefault(); // 폼 제출 시 페이지가 새로고침되는 현상 방지
-  document.getElementById('q').blur(); // 검색창 포커스를 해제하여 모바일 키보드 닫기
+  e.preventDefault();
+  document.getElementById('q').blur();
 });
 
 /* I'm Feeling Lucky (랜덤 도서 오픈) 기능 */
@@ -756,17 +895,13 @@ document.getElementById('luckyBtn').onclick = () => {
     showToast('도서 데이터가 없어 선택할 수 없습니다.');
     return;
   }
-  // 전체 데이터(currentData) 기준 랜덤 선택
   const randomBook = currentData[Math.floor(Math.random() * currentData.length)];
   
-  // 현재 filteredData 상에서 해당 항목의 위치(index) 탐색
   let targetIndex = filteredData.indexOf(randomBook);
   
-  // 만약 검색어로 인해 현재 필터링된 결과에 없다면, 전체 목록으로 재설정 후 열기
   if (targetIndex === -1) {
-    document.getElementById('q').value = '';
-    filterAndRender(false);
-    targetIndex = filteredData.indexOf(randomBook);
+    filteredData = [randomBook];
+    targetIndex = 0;
   }
   
   openModal(targetIndex);
